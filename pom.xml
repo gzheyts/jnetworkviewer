@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ru.gzheyts.jnetworkviewer</groupId>
+    <artifactId>jnetworkviewer</artifactId>
+    <version>1.0</version>
+
+    <dependencies>
+
+
+        <dependency>
+            <groupId>com.github.monkeysintown</groupId>
+            <artifactId>jgraphx</artifactId>
+            <version>3.1.2.1</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>net.sf.doolin</groupId>
+            <artifactId>javadocking</artifactId>
+            <version>1.5</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/javadocking.jar</systemPath>
+        </dependency>
+
+        <!-- third-party javadocking's libraries -->
+
+        <dependency>
+            <groupId>jcommon</groupId>
+            <artifactId>jcommon</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/jcommon.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>jfreechart</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/jfreechart.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>liquidlnf</groupId>
+            <artifactId>liquidlnf</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/liquidlnf.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>nimrodlf</groupId>
+            <artifactId>nimrodlf</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/nimrodlf.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>substance-lite</groupId>
+            <artifactId>substance-lite</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/substance-lite.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>tinylaf</groupId>
+            <artifactId>tinylaf</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/tinylaf.jar</systemPath>
+        </dependency>
+
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+
+    </dependencies>
+
+</project>
