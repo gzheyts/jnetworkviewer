@@ -24,8 +24,7 @@ public class MenuBar extends JMenuBar {
 
 
         JMenu file = add(new JMenu("File"));
-        JMenuItem exitMI = new JMenuItem("exit");
-        exitMI.setAction(new AbstractAction() {
+        JMenuItem exitMI = new JMenuItem(new AbstractAction("Exit") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (frame != null) {
