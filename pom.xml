@@ -81,9 +81,7 @@
         <dependency>
             <groupId>sqlite</groupId>
             <artifactId>sqlite</artifactId>
-            <version>e7c2e97</version> <!--   commit revision -->
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/Sqlite-1.0.jar</systemPath>
+            <version>1.0</version>
         </dependency>
 
         <dependency>
