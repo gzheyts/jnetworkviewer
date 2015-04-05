@@ -8,10 +8,13 @@ import com.javadocking.dockable.DockingMode;
 import com.javadocking.model.FloatDockModel;
 import com.javadocking.visualizer.FloatExternalizer;
 import com.javadocking.visualizer.LineMinimizer;
+import com.mxgraph.layout.mxGraphLayout;
+import com.mxgraph.layout.mxOrganicLayout;
 import org.apache.log4j.Logger;
 import ru.gzheyts.jnetworkviewer.gui.NetworkMiniMap;
 import ru.gzheyts.jnetworkviewer.gui.NetworkView;
 import ru.gzheyts.jnetworkviewer.gui.menu.MenuBar;
+import ru.gzheyts.jnetworkviewer.loader.DatabaseLoader;
 import ru.gzheyts.jnetworkviewer.model.Network;
 
 import javax.swing.*;
@@ -45,10 +48,11 @@ public class NetworkViewer extends JPanel {
         // Give the dock model to the docking manager.
         DockingManager.setDockModel(dockModel);
 
-        network = new Network(true);
+        network = new Network();
         networkView = new NetworkView(network, "Network", DockingMode.CENTER);
         networkMiniMap = new NetworkMiniMap(networkView,"MiniMap", DockingMode.LEFT  + DockingMode.RIGHT + DockingMode.FLOAT + DockingMode.SINGLE );
 
+       loadAndLayoutNetwork(network);
 
 
         BorderDock rootDock = setupDockContainer();
@@ -60,8 +64,23 @@ public class NetworkViewer extends JPanel {
 
         frame.setJMenuBar(new MenuBar(frame, networkMiniMap.getDockable()));
 
-        frame.getContentPane().add(this);
+        frame.add(this);
 
+
+    }
+
+    private void loadAndLayoutNetwork(final Network network) {
+
+        DatabaseLoader.laod(network);
+
+        final mxGraphLayout layout = new mxOrganicLayout(network,new Rectangle(0,0,1000,1000));
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                layout.execute(network.getDefaultParent());
+            }
+        });
 
     }
 
