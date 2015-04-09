@@ -111,10 +111,9 @@ public final class RandomNetworkGenerator {
             network.getModel().endUpdate();
         }
 
-        logger.info("network generation time: " + (System.currentTimeMillis() - start) + " ms");
+        logger.debug("network generation time: " + (System.currentTimeMillis() - start) + " ms");
 
     }
-
 
 
 }

@@ -1,6 +1,6 @@
 package jung;
 
-import edu.uci.ics.jung.algorithms.layout.*;
+import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.SpringLayout;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -24,12 +24,12 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * @author george
+ * @author gzheyts
  */
-public class JungNetworkViewer extends JPanel{
+public class JungNetworkViewer extends JPanel {
 
-    DirectedGraph<String,String> graph;
-    VisualizationViewer<String,String> vv;
+    DirectedGraph<String, String> graph;
+    VisualizationViewer<String, String> vv;
 
     public JungNetworkViewer() {
         super(new BorderLayout());
@@ -45,7 +45,7 @@ public class JungNetworkViewer extends JPanel{
 
         vv = new VisualizationViewer<String, String>(layout, new Dimension(640, 480));
         vv.getRenderContext().setEdgeShapeTransformer(new EdgeShape.Line());
-        vv.getRenderContext().setEdgeDrawPaintTransformer(new PickableEdgePaintTransformer<String>(vv.getPickedEdgeState(),Color.black,Color.cyan));
+        vv.getRenderContext().setEdgeDrawPaintTransformer(new PickableEdgePaintTransformer<String>(vv.getPickedEdgeState(), Color.black, Color.cyan));
 
         vv.setBackground(Color.lightGray);
 
@@ -91,7 +91,7 @@ public class JungNetworkViewer extends JPanel{
         public static void laod(Graph<String, String> network) {
 
             beforeLoad();
-            DirectedSparseMultigraph<String,String> graph  = (DirectedSparseMultigraph) network;
+            DirectedSparseMultigraph<String, String> graph = (DirectedSparseMultigraph) network;
             java.util.List<AuthorImpl> authors = api.author().findAllAuthors();
             System.out.println("found " + authors.size() + " authors");
 
@@ -104,15 +104,15 @@ public class JungNetworkViewer extends JPanel{
                 for (Author coauthor : api.author().findCoauthors(author)) {
 
 
-                    ((DirectedSparseMultigraph) network).addEdge( author.getId() +"" + coauthor.getId()
-                            ,author.getName(), coauthor.getName(), EdgeType.DIRECTED);
+                    ((DirectedSparseMultigraph) network).addEdge(author.getId() + "" + coauthor.getId()
+                            , author.getName(), coauthor.getName(), EdgeType.DIRECTED);
                 }
             }
 
             afterLoad();
         }
 
-        private static  void beforeLoad() {
+        private static void beforeLoad() {
             api.onStart();
         }
 

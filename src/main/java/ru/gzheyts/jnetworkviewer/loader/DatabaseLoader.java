@@ -1,5 +1,7 @@
 package ru.gzheyts.jnetworkviewer.loader;
 
+import com.mxgraph.layout.mxGraphLayout;
+import com.mxgraph.layout.mxOrganicLayout;
 import com.mxgraph.model.mxGraphModel;
 import net.inference.Config;
 import net.inference.database.DatabaseApi;
@@ -7,33 +9,40 @@ import net.inference.database.dto.Author;
 import net.inference.sqlite.SqliteApi;
 import net.inference.sqlite.dto.AuthorImpl;
 import org.apache.log4j.Logger;
+import ru.gzheyts.jnetworkviewer.NetworkViewer;
 import ru.gzheyts.jnetworkviewer.model.Network;
+import ru.gzheyts.jnetworkviewer.model.convertеrs.ToStringConverter;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
- * @author george
+ * @author gzheyts
  */
 public class DatabaseLoader {
-    private static  DatabaseApi api;
+    private static DatabaseApi api;
     private static final Logger logger = Logger.getLogger(DatabaseLoader.class);
+
     static {
         api = new SqliteApi(Config.Database.TEST, false);
     }
 
+    public static void load(Network network) {
 
-    public static void laod(Network network) {
 
-        beforeLoad();
-        logger.info("loading network...");
+        logger.debug("loading network...");
         network.getModel().beginUpdate();
 
         try {
             List<AuthorImpl> authors = api.author().findAllAuthors();
-            logger.info("found " + authors.size() + " authors");
+            logger.debug("found " + authors.size() + " authors");
 
             for (Author author : authors) {
-                network.insertVertex(String.valueOf(author.getId()), author.getName());
+                logger.debug("[node] --> " + "( " + String.valueOf(author.getId()) + " ) " + ToStringConverter.convert(author));
+
+                network.insertVertex(String.valueOf(author.getId()), author);
             }
 
             for (Author author : authors) {
@@ -43,6 +52,11 @@ public class DatabaseLoader {
                     Object authorCell = ((mxGraphModel) network.getModel()).getCell(String.valueOf(author.getId()));
                     Object coauthorCell = ((mxGraphModel) network.getModel()).getCell(String.valueOf(coauthor.getId()));
 
+                    logger.debug("[edge] --> " + "( " + String.valueOf(author.getId() + "-" + coauthor.getId()) + " ) "
+                            + ToStringConverter.convert(author)
+                            + " --> "
+                            + ToStringConverter.convert(coauthor));
+
                     network.insertEdge(String.valueOf(author.getId() + "-" + coauthor.getId()), null, authorCell, coauthorCell);
                 }
             }
@@ -51,11 +65,12 @@ public class DatabaseLoader {
             network.getModel().endUpdate();
 
         }
-        logger.info("network loaded");
-        afterLoad();
+        logger.debug("network loaded");
+
+//        afterLoad();
     }
 
-    private static  void beforeLoad() {
+    private static void beforeLoad() {
         //api.onStart();
     }
 
@@ -63,4 +78,39 @@ public class DatabaseLoader {
         api.onStop();
     }
 
+    public static class Worker extends SwingWorker<Network, Void> {
+
+        private NetworkViewer networkViewer;
+
+
+        public Worker(NetworkViewer viewer) {
+            networkViewer = viewer;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                Network network = get();
+                networkViewer.getNetworkView().setGraph(network);
+                networkViewer.hideLoader();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        protected Network doInBackground() throws Exception {
+            Network loaded = new Network();
+            load(loaded);
+
+            mxGraphLayout layout = new mxOrganicLayout(loaded, new Rectangle(0, 0, 1000, 1000));
+            layout.execute(loaded.getDefaultParent());
+
+            return loaded;
+        }
+    }
 }
+
+

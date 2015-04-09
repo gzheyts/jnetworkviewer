@@ -8,13 +8,10 @@ import com.javadocking.dockable.DockingMode;
 import com.javadocking.model.FloatDockModel;
 import com.javadocking.visualizer.FloatExternalizer;
 import com.javadocking.visualizer.LineMinimizer;
-import com.mxgraph.layout.mxGraphLayout;
-import com.mxgraph.layout.mxOrganicLayout;
 import org.apache.log4j.Logger;
 import ru.gzheyts.jnetworkviewer.gui.NetworkMiniMap;
 import ru.gzheyts.jnetworkviewer.gui.NetworkView;
 import ru.gzheyts.jnetworkviewer.gui.menu.MenuBar;
-import ru.gzheyts.jnetworkviewer.loader.DatabaseLoader;
 import ru.gzheyts.jnetworkviewer.model.Network;
 
 import javax.swing.*;
@@ -28,18 +25,32 @@ import java.awt.*;
 public class NetworkViewer extends JPanel {
 
 
+    public static final NetworkViewer INSTANCE = new NetworkViewer();
+
     public static final int FRAME_WIDTH = 600;
     public static final int FRAME_HEIGHT = 450;
 
     private static final Logger logger = Logger.getLogger(NetworkViewer.class);
+
+    private JPanel rootPanel;
 
     private Network network;
     private NetworkView networkView;
     private NetworkMiniMap networkMiniMap;
 
 
-    public NetworkViewer(JFrame frame) {
+    private JLabel loadingLabel;
+
+
+    private NetworkViewer() {
         super(new BorderLayout());
+    }
+
+
+    private void init(JFrame frame) {
+
+        loadingLabel = new JLabel("Loading...", new ImageIcon(getClass().getClassLoader().getResource("images/loader.gif")),SwingConstants.CENTER);
+        loadingLabel.setPreferredSize(new Dimension(300, 300));
 
         // Create the dock model for the docks.
         FloatDockModel dockModel = new FloatDockModel();
@@ -50,39 +61,20 @@ public class NetworkViewer extends JPanel {
 
         network = new Network();
         networkView = new NetworkView(network, "Network", DockingMode.CENTER);
-        networkMiniMap = new NetworkMiniMap(networkView,"MiniMap", DockingMode.LEFT  + DockingMode.RIGHT + DockingMode.FLOAT + DockingMode.SINGLE );
-
-       loadAndLayoutNetwork(network);
-
+        networkMiniMap = new NetworkMiniMap(networkView, "MiniMap", DockingMode.LEFT + DockingMode.RIGHT + DockingMode.FLOAT + DockingMode.SINGLE);
 
         BorderDock rootDock = setupDockContainer();
 
 
-        JPanel rootPanel = setupVisualizers(frame, dockModel, rootDock);
+        rootPanel = setupVisualizers(frame, dockModel, rootDock);
 
         add(rootPanel, BorderLayout.CENTER);
 
         frame.setJMenuBar(new MenuBar(frame, networkMiniMap.getDockable()));
 
         frame.add(this);
-
-
     }
 
-    private void loadAndLayoutNetwork(final Network network) {
-
-        DatabaseLoader.laod(network);
-
-        final mxGraphLayout layout = new mxOrganicLayout(network,new Rectangle(0,0,1000,1000));
-
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                layout.execute(network.getDefaultParent());
-            }
-        });
-
-    }
 
     private BorderDock setupDockContainer() {
         BorderDock rootDock = new BorderDock(new SingleDockFactory());
@@ -101,7 +93,7 @@ public class NetworkViewer extends JPanel {
         dockModel.addVisualizer("externializer", externalizer, frame);
 
         LineMinimizer minimizer = new LineMinimizer(rootDock);
-        dockModel.addVisualizer("minimizer", minimizer,frame);
+        dockModel.addVisualizer("minimizer", minimizer, frame);
         return minimizer;
     }
 
@@ -112,7 +104,7 @@ public class NetworkViewer extends JPanel {
 
         JFrame appFrame = new JFrame("Network Viewer");
 
-        new NetworkViewer(appFrame);
+        NetworkViewer.INSTANCE.init(appFrame);
         // Create the panel and add it to the appFrame.
 
 
@@ -123,18 +115,55 @@ public class NetworkViewer extends JPanel {
         appFrame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
         appFrame.setVisible(true);
 
+
+        logger.debug("application started");
+
+
+    }
+
+    public Network getNetwork() {
+        return network;
+    }
+
+    public NetworkView getNetworkView() {
+        return networkView;
+    }
+
+    public NetworkMiniMap getNetworkMiniMap() {
+        return networkMiniMap;
     }
 
     public static void main(String args[]) {
 
-        logger.info("starting application");
+        logger.debug("starting application");
 
         Runnable doCreateAndShowGUI = new Runnable() {
             public void run() {
                 createAndShowGUI();
             }
         };
-        SwingUtilities.invokeLater(doCreateAndShowGUI);
+        new Thread(doCreateAndShowGUI).start();
+
+    }
+
+
+    public void showLoader() {
+        remove(rootPanel);
+        rootPanel.setVisible(false);
+
+        add(loadingLabel, BorderLayout.CENTER);
+        loadingLabel.setVisible(true);
+
+        validate();
+    }
+
+    public void hideLoader() {
+
+        remove(loadingLabel);
+        add(rootPanel, BorderLayout.CENTER);
+        loadingLabel.setVisible(false);
+        rootPanel.setVisible(true);
+        validate();
 
     }
 

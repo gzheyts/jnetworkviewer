@@ -7,7 +7,6 @@ import com.mxgraph.swing.handler.mxKeyboardHandler;
 import com.mxgraph.swing.handler.mxRubberband;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.mxGraphOutline;
-import com.mxgraph.util.*;
 import com.mxgraph.view.mxGraph;
 
 import java.awt.*;
@@ -40,7 +39,6 @@ public class NetworkView extends mxGraphComponent {
         setGridVisible(true);
         getViewport().getView().setBackground(Color.LIGHT_GRAY);
     }
-
 
 
     private void setupListeners() {

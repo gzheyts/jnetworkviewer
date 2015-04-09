@@ -6,6 +6,9 @@ import com.javadocking.dockable.action.DefaultDockableStateAction;
 import com.javadocking.event.DockingEvent;
 import com.javadocking.event.DockingListener;
 import org.apache.log4j.Logger;
+import ru.gzheyts.jnetworkviewer.NetworkViewer;
+import ru.gzheyts.jnetworkviewer.loader.DatabaseLoader;
+import ru.gzheyts.jnetworkviewer.model.Network;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -28,7 +31,7 @@ public class MenuBar extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (frame != null) {
-                    logger.info("Closing application");
+                    logger.debug("Closing application");
                     frame.dispose();
                 }
             }
@@ -37,12 +40,24 @@ public class MenuBar extends JMenuBar {
         exitMI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
         file.add(exitMI);
 
+        JMenuItem loadMI = new JMenuItem(new AbstractAction("load network") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                NetworkViewer.INSTANCE.showLoader();
+                NetworkViewer.INSTANCE.getNetworkView().setGraph(Network.empty());
+                DatabaseLoader.Worker worker = new DatabaseLoader.Worker(NetworkViewer.INSTANCE);
+                worker.execute();
+            }
+        });
+        loadMI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
+
+        file.add(loadMI);
+
         JMenu view = add(new JMenu("View"));
 
         JCheckBoxMenuItem viewItem = new DockableMenuItem(dockable);
         view.add(viewItem);
         viewItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, ActionEvent.CTRL_MASK));
-
 
 
     }
@@ -51,10 +66,8 @@ public class MenuBar extends JMenuBar {
     /**
      * A check box menu item to add or remove the dockable.
      */
-    private class DockableMenuItem extends JCheckBoxMenuItem
-    {
-        public DockableMenuItem(Dockable dockable)
-        {
+    private class DockableMenuItem extends JCheckBoxMenuItem {
+        public DockableMenuItem(Dockable dockable) {
             super(dockable.getTitle(), dockable.getIcon());
 
             setSelected(dockable.getDock() != null);
@@ -69,16 +82,14 @@ public class MenuBar extends JMenuBar {
      * A listener that listens when menu items with dockables are selected and deselected.
      * It also listens when dockables are closed or docked.
      */
-    private class DockableMediator implements ItemListener, DockingListener
-    {
+    private class DockableMediator implements ItemListener, DockingListener {
 
         private Dockable dockable;
         private Action closeAction;
         private Action restoreAction;
         private JMenuItem dockableMenuItem;
 
-        public DockableMediator(Dockable dockable, JMenuItem dockableMenuItem)
-        {
+        public DockableMediator(Dockable dockable, JMenuItem dockableMenuItem) {
 
             this.dockable = dockable;
             this.dockableMenuItem = dockableMenuItem;
@@ -87,17 +98,13 @@ public class MenuBar extends JMenuBar {
 
         }
 
-        public void itemStateChanged(ItemEvent itemEvent)
-        {
+        public void itemStateChanged(ItemEvent itemEvent) {
 
             dockable.removeDockingListener(this);
-            if (itemEvent.getStateChange() == ItemEvent.DESELECTED)
-            {
+            if (itemEvent.getStateChange() == ItemEvent.DESELECTED) {
                 // Close the dockable.
                 closeAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Close"));
-            }
-            else
-            {
+            } else {
                 // Restore the dockable.
                 restoreAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Restore"));
             }
@@ -106,23 +113,19 @@ public class MenuBar extends JMenuBar {
         }
 
         public void dockingChanged(DockingEvent dockingEvent) {
-            if (dockingEvent.getDestinationDock() != null)
-            {
+            if (dockingEvent.getDestinationDock() != null) {
                 dockableMenuItem.removeItemListener(this);
                 dockableMenuItem.setSelected(true);
                 dockableMenuItem.addItemListener(this);
-            }
-            else
-            {
+            } else {
                 dockableMenuItem.removeItemListener(this);
                 dockableMenuItem.setSelected(false);
                 dockableMenuItem.addItemListener(this);
             }
         }
 
-        public void dockingWillChange(DockingEvent dockingEvent) {}
+        public void dockingWillChange(DockingEvent dockingEvent) {
+        }
 
     }
-
-
 }
