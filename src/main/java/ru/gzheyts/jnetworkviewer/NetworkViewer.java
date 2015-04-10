@@ -2,6 +2,7 @@ package ru.gzheyts.jnetworkviewer;
 
 import com.javadocking.DockingManager;
 import com.javadocking.dock.BorderDock;
+import com.javadocking.dock.CompositeLineDock;
 import com.javadocking.dock.Position;
 import com.javadocking.dock.factory.SingleDockFactory;
 import com.javadocking.dockable.DockingMode;
@@ -49,7 +50,7 @@ public class NetworkViewer extends JPanel {
 
     private void init(JFrame frame) {
 
-        loadingLabel = new JLabel("Loading...", new ImageIcon(getClass().getClassLoader().getResource("images/loader.gif")),SwingConstants.CENTER);
+        loadingLabel = new JLabel("Loading...", new ImageIcon(getClass().getClassLoader().getResource("images/loader.gif")), SwingConstants.CENTER);
         loadingLabel.setPreferredSize(new Dimension(300, 300));
 
         // Create the dock model for the docks.
@@ -63,7 +64,7 @@ public class NetworkViewer extends JPanel {
         networkView = new NetworkView(network, "Network", DockingMode.CENTER);
         networkMiniMap = new NetworkMiniMap(networkView, "MiniMap", DockingMode.LEFT + DockingMode.RIGHT + DockingMode.FLOAT + DockingMode.SINGLE);
 
-        BorderDock rootDock = setupDockContainer();
+        BorderDock rootDock = setupDockContainer(frame, dockModel);
 
 
         rootPanel = setupVisualizers(frame, dockModel, rootDock);
@@ -76,12 +77,18 @@ public class NetworkViewer extends JPanel {
     }
 
 
-    private BorderDock setupDockContainer() {
+    private BorderDock setupDockContainer(JFrame frame, FloatDockModel dockModel) {
         BorderDock rootDock = new BorderDock(new SingleDockFactory());
 
         rootDock.addChildDock(networkMiniMap.getDock(), new Position(Position.LEFT));
 
         rootDock.addChildDock(networkView.getDock(), new Position(Position.CENTER));
+
+        //
+        CompositeLineDock previewContainer = new CompositeLineDock(CompositeLineDock.ORIENTATION_HORIZONTAL, true);
+        dockModel.addRootDock("previewContainer", previewContainer, frame);
+
+        rootDock.addChildDock(previewContainer, new Position(Position.BOTTOM));
         return rootDock;
     }
 
