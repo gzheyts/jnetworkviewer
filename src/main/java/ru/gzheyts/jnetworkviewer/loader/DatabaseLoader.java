@@ -2,7 +2,6 @@ package ru.gzheyts.jnetworkviewer.loader;
 
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.mxOrganicLayout;
-import com.mxgraph.model.mxGraphModel;
 import net.inference.Config;
 import net.inference.database.DatabaseApi;
 import net.inference.database.dto.Author;
@@ -42,24 +41,22 @@ public class DatabaseLoader {
             logger.debug("found " + authors.size() + " authors");
 
             for (Author author : authors) {
-                logger.debug("[node] --> " + "( " + String.valueOf(author.getId()) + " ) " + ToStringConverter.convert(author));
+                logger.debug("[node] --> " + "( " + Network.cellId(author) + " ) " + ToStringConverter.convert(author));
 
-                network.insertVertex(String.valueOf(author.getId()), author);
+                network.insertVertex(author);
             }
 
             for (Author author : authors) {
                 api.author().findCoauthors(author);
                 for (Author coauthor : api.author().findCoauthors(author)) {
 
-                    Object authorCell = ((mxGraphModel) network.getModel()).getCell(String.valueOf(author.getId()));
-                    Object coauthorCell = ((mxGraphModel) network.getModel()).getCell(String.valueOf(coauthor.getId()));
 
-                    logger.debug("[edge] --> " + "( " + String.valueOf(author.getId() + "-" + coauthor.getId()) + " ) "
+                    logger.debug("[edge] --> " + "( " + Network.cellId(author, coauthor) + " ) "
                             + ToStringConverter.convert(author)
                             + " --> "
                             + ToStringConverter.convert(coauthor));
 
-                    network.insertEdge(String.valueOf(author.getId() + "-" + coauthor.getId()), null, authorCell, coauthorCell);
+                    network.insertEdge(null, author, coauthor);
                 }
             }
 
@@ -80,8 +77,8 @@ public class DatabaseLoader {
         try {
 
             for (Cluster cluster : api.cluster().findAllClusters()) {
-                logger.debug("[node] --> " + "( " + String.valueOf(cluster.getId()) + " ) " + ToStringConverter.convert(cluster));
-                network.insertVertex(String.valueOf(cluster.getId()), cluster);
+                logger.debug("[node] --> " + "( " + Network.cellId(cluster) + " ) " + ToStringConverter.convert(cluster));
+                network.insertVertex(cluster);
             }
         } finally {
             network.getModel().endUpdate();
@@ -95,12 +92,13 @@ public class DatabaseLoader {
     public static void loadCluster(Network network, Cluster cluster) {
         logger.debug("load cluster .. " + ToStringConverter.convert(cluster));
         network.getModel().beginUpdate();
+        String group = "cluster" + cluster.getId();
         try {
             List<AuthorImpl> authorsForCluster = api.author().findAuthorsForCluster(cluster);
             // adding author nodes
             for (Author author : authorsForCluster) {
-                logger.debug("[node] --> " + "( " + String.valueOf(author.getId()) + " ) " + author);
-                network.insertVertex(String.valueOf(author.getId()), author, 10, 10);
+                logger.debug("[node] --> " + "( " + Network.cellId(author, group) + " ) " + author);
+                network.insertVertex(author, group);
             }
 
             // for each coauthor of retrieved author add relation if they both are in same cluster
@@ -111,15 +109,12 @@ public class DatabaseLoader {
 
                     if (coauthorClusters.contains(cluster)) {
 
-                        Object authorCell = ((mxGraphModel) network.getModel()).getCell(String.valueOf(author.getId()));
-                        Object coauthorCell = ((mxGraphModel) network.getModel()).getCell(String.valueOf(coauthor.getId()));
-
-                        logger.debug("[edge] --> " + "( " + String.valueOf(author.getId() + "-" + coauthor.getId()) + " ) "
+                        logger.debug("[edge] --> " + "( " + Network.cellId(author, coauthor, group) + " ) "
                                 + ToStringConverter.convert(author)
                                 + " --> "
                                 + ToStringConverter.convert(coauthor));
 
-                        network.insertEdge(String.valueOf(author.getId() + "-" + coauthor.getId()), null, authorCell, coauthorCell);
+                        network.insertEdge(null, author, coauthor, group);
                     }
                 }
             }
@@ -128,6 +123,19 @@ public class DatabaseLoader {
         }
 
         logger.debug("cluster loaded  .. " + ToStringConverter.convert(cluster));
+    }
+
+
+    public static void loadClusters(Network network, Cluster[] clusters) {
+        Network clusterNetwork = Network.empty();
+
+        for (Cluster cluster : clusters) {
+            loadCluster(clusterNetwork, cluster);
+            Object[] cells = clusterNetwork.getChildCells(clusterNetwork.getDefaultParent());
+            network.addCells(cells);
+
+        }
+
     }
 
     private static void beforeLoad() {
