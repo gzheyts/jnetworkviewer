@@ -13,6 +13,7 @@ import ru.gzheyts.jnetworkviewer.loader.DatabaseLoader;
 import ru.gzheyts.jnetworkviewer.model.Network;
 import ru.gzheyts.jnetworkviewer.model.convertеrs.ToStringConverter;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
@@ -20,26 +21,44 @@ import java.awt.event.MouseWheelListener;
 /**
  * @author gzheyts
  */
-public class TwinClusterView extends mxGraphComponent implements DraggableContent {
+public class TwinClusterView extends JPanel implements DraggableContent {
 
     private Cluster firstCluster;
     private Cluster secondCluster;
     private mxRubberband rubberband;
+
+    private mxGraphComponent graphComponent;
+
+    private ClusterAuthorTableView tableView;
+    private JSplitPane splitPane;
 
     private SingleDock dock;
 
 
 
     public TwinClusterView(Network network, Cluster first, Cluster second) {
-        super(network);
 
-        rubberband = new mxRubberband(this);
+        super(new BorderLayout());
+
+        graphComponent = new mxGraphComponent(network);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+
+        tableView = new ClusterAuthorTableView(new Cluster[]{first, second});
+
+        rubberband = new mxRubberband(graphComponent);
 
         this.firstCluster = first;
         this.secondCluster = second;
 
-//        setEnabled(false);
-        setPreferredSize(new Dimension(200, 400));
+        setPreferredSize(new Dimension(200, 300));
+
+
+        splitPane.setRightComponent(graphComponent);
+        splitPane.setLeftComponent(tableView);
+        splitPane.setOneTouchExpandable(true);
+        splitPane.setDividerLocation(300);
+
+        add(splitPane, BorderLayout.CENTER);
 
         setupListeners();
         //todo : load in background
@@ -48,13 +67,13 @@ public class TwinClusterView extends mxGraphComponent implements DraggableConten
     }
 
     private void setupListeners() {
-        addMouseWheelListener(new MouseWheelListener() {
+       graphComponent. addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 if (e.getWheelRotation() < 0) {
-                    zoomIn();
+                    graphComponent.zoomIn();
                 } else {
-                    zoomOut();
+                    graphComponent.zoomOut();
                 }
 
             }
@@ -75,8 +94,9 @@ public class TwinClusterView extends mxGraphComponent implements DraggableConten
 
 
     public void initNetwork() {
-        DatabaseLoader.loadClusters((Network) getGraph(), new Cluster[]{firstCluster, secondCluster});
-        new mxCircleLayout(getGraph()).execute(getGraph().getDefaultParent());
+        Network graph = (Network) graphComponent.getGraph();
+        DatabaseLoader.loadClusters(graph, new Cluster[]{firstCluster, secondCluster});
+        new mxCircleLayout(graph).execute(graph.getDefaultParent());
 
     }
 
