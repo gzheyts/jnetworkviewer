@@ -6,6 +6,7 @@ import com.javadocking.dockable.*;
 import com.javadocking.dockable.action.DefaultDockableStateActionFactory;
 import com.javadocking.drag.DragListener;
 import com.mxgraph.layout.mxCircleLayout;
+import com.mxgraph.swing.handler.mxRubberband;
 import com.mxgraph.swing.mxGraphComponent;
 import net.inference.database.dto.Cluster;
 import ru.gzheyts.jnetworkviewer.loader.DatabaseLoader;
@@ -13,6 +14,8 @@ import ru.gzheyts.jnetworkviewer.model.Network;
 import ru.gzheyts.jnetworkviewer.model.convertеrs.ToStringConverter;
 
 import java.awt.*;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 /**
  * @author gzheyts
@@ -21,19 +24,41 @@ public class TwinClusterView extends mxGraphComponent implements DraggableConten
 
     private Cluster firstCluster;
     private Cluster secondCluster;
+    private mxRubberband rubberband;
+
     private SingleDock dock;
+
 
 
     public TwinClusterView(Network network, Cluster first, Cluster second) {
         super(network);
+
+        rubberband = new mxRubberband(this);
+
         this.firstCluster = first;
         this.secondCluster = second;
 
 //        setEnabled(false);
         setPreferredSize(new Dimension(200, 400));
+
+        setupListeners();
         //todo : load in background
         initNetwork();
 
+    }
+
+    private void setupListeners() {
+        addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (e.getWheelRotation() < 0) {
+                    zoomIn();
+                } else {
+                    zoomOut();
+                }
+
+            }
+        });
     }
 
     public void addDragListener(DragListener dragListener) {
