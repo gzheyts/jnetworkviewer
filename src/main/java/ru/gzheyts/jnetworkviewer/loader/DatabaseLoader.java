@@ -37,7 +37,7 @@ public class DatabaseLoader {
         network.getModel().beginUpdate();
 
         try {
-            List<AuthorImpl> authors = api.author().findAllAuthors();
+            List<AuthorImpl> authors = api.author().findAll();
             logger.debug("found " + authors.size() + " authors");
 
             for (Author author : authors) {
@@ -76,7 +76,7 @@ public class DatabaseLoader {
         network.getModel().beginUpdate();
         try {
 
-            for (Cluster cluster : api.cluster().findAllClusters()) {
+            for (Cluster cluster : api.cluster().findAll()) {
                 logger.debug("[node] --> " + "( " + Network.cellId(cluster) + " ) " + ToStringConverter.convert(cluster));
                 network.insertVertex(cluster);
             }
