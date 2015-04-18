@@ -92,7 +92,7 @@ public class JungNetworkViewer extends JPanel {
 
             beforeLoad();
             DirectedSparseMultigraph<String, String> graph = (DirectedSparseMultigraph) network;
-            java.util.List<AuthorImpl> authors = api.author().findAllAuthors();
+            java.util.List<AuthorImpl> authors = api.author().findAll();
             System.out.println("found " + authors.size() + " authors");
 
             for (Author author : authors) {

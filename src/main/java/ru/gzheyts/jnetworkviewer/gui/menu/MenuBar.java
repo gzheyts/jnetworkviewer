@@ -53,6 +53,22 @@ public class MenuBar extends JMenuBar {
 
         file.add(loadMI);
 
+
+        JMenuItem loadClustersMI = new JMenuItem(new AbstractAction("load clusters") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                NetworkViewer.INSTANCE.showLoader();
+                NetworkViewer.INSTANCE.getNetworkView().setGraph(Network.empty());
+                DatabaseLoader.FetchClustersWorker worker = new DatabaseLoader.FetchClustersWorker(NetworkViewer.INSTANCE);
+                worker.execute();
+            }
+        });
+        loadClustersMI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_K, ActionEvent.CTRL_MASK));
+
+
+        file.add(loadClustersMI);
+
+
         JMenu view = add(new JMenu("View"));
 
         JCheckBoxMenuItem viewItem = new DockableMenuItem(dockable);
